@@ -1,69 +1,85 @@
 package Bank;
-
-import java.util.*;
+import java.util.Scanner;
 
 public class ATM {
-	private int total;//총액
-	private int	saejong=1000;//만원권
-	private int sinsa=200;//5만원권
-	public boolean IsMinus=true;
-	private ArrayList<String> transaction = new ArrayList<String>();
+		
+	public static void main(String[] args) {
+		Scanner input=new Scanner(System.in);
+		ATMSystem sys=new ATMSystem();
+		Customer customer;
+		
+		boolean loopCheck=true;
+		int inputNumber;
+		int choice;
 
-	//일단 생성, 날짜 업데이트 없이 채웠다고 가정
-	public ATM(){total=10000*saejong+50000*sinsa;}
-	//잔액 조회
-	public void Show() {
-		transaction.add("%d");
-		System.out.printf("현재 잔액: %d 원\n만원권: %d 장\n오만원권: %d 장\n",total,saejong,sinsa);
-	}	
-	//입금 
-	public void Plus(int money) {
-		total+=money;// 일단 입금
-		//지폐 정리
-		if(money>50000) {// 5만원 초과시
-			sinsa+=(money/50000);// 5만원권 추가
-			saejong+=(money%50000)/10000;//만원권 추가
-		}
-		else
-			saejong+=(money/10000);
-	}
-	//출금
-	public void Minus(int money) {
-		if(total<money) {// 잔액 부족
-			System.out.println("ATM 잔액이 부족합니다.");
-			IsMinus=false;
-			return;
-		}
-		if((money%10000)!=0) {// 만원권 혹은 오만원권만 가능
-			System.out.println("출금은 만원권 혹은 오만원권만 가능합니다.");
-			IsMinus=false;
-			return;
-		}
-		//지폐 정리
-		if((money>=50000)&&(money/50000)<=sinsa&&(money%50000)/10000<=saejong) {//출금 금액이 오만원보다 크고, 오만원권과 만원권이 충분히 있다면
-			IsMinus=true;
-			total-=money;
-			sinsa-=(money/50000);
-			saejong-=(money%50000)/10000;
-		}
-		else if((money>=50000)&&(money/50000)>sinsa&&(money/10000)<=saejong) {//출금 금액이 오만원권보다 크고, 오만원권은 없는데 만원권이 있다면
-			IsMinus=true;
-			total-=money;
-			saejong-=(money/10000);
-		}
-		else if((money>=50000)&&(money<60000)&&(money/50000)<sinsa){//출금 금액이 오만원 이상, 6만원 미만, 오만원권 충분
-			IsMinus=true;
-			total-=money;
-			sinsa-=(money/50000);
-		}
-		else if((money<50000)&&(money/10000)<=saejong) {//오만원 미만, 만원권 충분
-			IsMinus=true;
-			total-=money;
-			saejong-=(money/10000);
+		System.out.println("============ATM 가동==============");
+		
+		System.out.println("안녕하세요! 고객번호를 입력해주세요");
+		
+		do {
+			inputNumber=input.nextInt();
+			if(!sys.findCustomer(inputNumber)) {
+				System.out.println("고객번호를 다시 입력해주세요");
+			}
+			else {
+				break;
+			}
+		} while(true);
+		
+		customer = sys.getSelectedCustomer();
+		
+		System.out.printf("반갑습니다! %s 고객님!\n", customer.getCustomerName());
+		System.out.printf("고객님은 현재 %d개의 계좌가 있습니다.", customer.howManyAccount());
+		
+		if (customer.howManyAccount() == 2) {
+			System.out.println("어떤 계좌를 선택하시겠습니까?\n1. 입출금 2. 예금");
+			do {
+				inputNumber=input.nextInt();
+				if(inputNumber != 1 && inputNumber != 2) {
+					System.out.println("다시 입력해주세요");
+				}
+				else {
+					if(inputNumber == 1) {
+						System.out.println("입출금 계좌를 선택하셨습니다.");
+						sys.setWhichAccount(1);
+					}
+					else {
+						System.out.println("예금 계좌를 선택하셨습니다.");
+						sys.setWhichAccount(2);
+					}
+					break;
+				}
+			} while(true);
 		}
 		else {
-			IsMinus=false;
-			System.out.println("ATM 안에 지폐가 부족합니다.");
-		}//나머지 전부 지폐부족
-	}	
+			sys.setWhichAccount(1);
+		}
+		
+		
+		while(loopCheck) {
+			System.out.println("원하시는 작업을 선택해주세요.");
+			System.out.println("1.조회   2.입금   3.출금   4.ATM 조회   5.종료");
+			choice=input.nextInt();
+			switch (choice) {
+			case 1:
+				sys.Show();
+				break;
+			case 2:
+				sys.Deposit();
+				break;
+			case 3:
+				sys.Withdrawl();
+				break;
+			case 4: sys.ShowATM();	break;
+			case 5:	
+				System.out.println("ATM을 종료합니다");
+				sys.writeTransactionRecord();
+				loopCheck=false;	
+				break;
+			default: System.out.println("잘못된 입력입니다.\n");
+			}
+		}
+		input.close();
+	}
+
 }

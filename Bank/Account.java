@@ -1,27 +1,32 @@
 package Bank;
 
 public class Account {
-	private int balance;
-	public boolean IsDebit=true;
+	protected int balance;
 	
-	public Account(int ini){
-		balance=ini;
+	public Account(){
+		balance=0;
 	}
 	
-	public int get(){ return balance;}
-	
-	public void credit(int add) {
-		balance=add+balance;
+	public Account(int initialBalance){
+		balance=initialBalance;
 	}
 	
-	public void debit(int sub){
-		if(sub>balance) {
-			IsDebit=false;
-			System.out.println("Debit amount exceeded accout balance");
+	public void credit(int amount) {
+		balance = amount+balance;
+	}
+	
+	public boolean debit(int amount){
+		if(amount>balance) {
+			System.out.println("계좌 잔고보다 더 많이 출금할 수 없습니다.");
+			return false;
 		}
 		else {
-			IsDebit=true;
-			balance=balance-sub;
+			balance=balance-amount;
+			return true;
 		}
 	}
+	
+	public int getBalance(){ return balance;}
+
+	public void setBalance(int amount){ this.balance = amount;}
 }
